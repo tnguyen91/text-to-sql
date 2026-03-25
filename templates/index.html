@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to SQL Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        /* The question input area */
+        .input-area {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .input-area label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4f46e5;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover { background: #4338ca; }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Example questions */
+        .examples {
+            margin-top: 16px;
+        }
+
+        .examples span {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .example-btn {
+            background: #f0efff;
+            color: #4f46e5;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin: 4px 4px 4px 0;
+            transition: background 0.2s;
+        }
+
+        .example-btn:hover { background: #e0deff; }
+
+        /* Results area */
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .results.visible { display: block; }
+
+        .sql-display {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: "Cascadia Code", "Fira Code", monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .sql-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Results table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f8f8;
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        tr:hover td { background: #fafafa; }
+
+        .row-count {
+            color: #666;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text to SQL Explorer</h1>
+        <p class="subtitle">Ask questions about the database in plain English</p>
+
+        <div class="input-area">
+            <label for="question">Your question:</label>
+            <div class="input-row">
+                <input
+                    type="text"
+                    id="question"
+                    placeholder="e.g. What are the top 5 best-selling products?"
+                >
+                <button id="submit-btn" onclick="submitQuestion()">Ask</button>
+            </div>
+
+            <div class="examples">
+                <span>Try these: </span>
+                <button class="example-btn" onclick="tryExample(this)">What are the top 5 products by total revenue?</button>
+                <button class="example-btn" onclick="tryExample(this)">Which customers from California have spent the most?</button>
+                <button class="example-btn" onclick="tryExample(this)">What is the average rating for each product category?</button>
+                <button class="example-btn" onclick="tryExample(this)">Show me all orders from March 2025 with their items</button>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <!-- Results appear here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        // Let the user press Enter to submit
+        document.getElementById("question").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") submitQuestion();
+        });
+
+        function tryExample(btn) {
+            document.getElementById("question").value = btn.textContent;
+            submitQuestion();
+        }
+
+        async function submitQuestion() {
+            const question = document.getElementById("question").value.trim();
+            if (!question) return;
+
+            const resultsDiv = document.getElementById("results");
+            const submitBtn = document.getElementById("submit-btn");
+
+            // Show loading state
+            resultsDiv.className = "results visible";
+            resultsDiv.innerHTML = '<div class="loading">Thinking...</div>';
+            submitBtn.disabled = true;
+
+            try {
+                // Send the question to our Flask server
+                const response = await fetch("/query", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    // Something went wrong
+                    resultsDiv.innerHTML = `
+                        <div class="error">${data.error}</div>
+                        ${data.sql ? `
+                            <div class="sql-label">Generated SQL</div>
+                            <div class="sql-display">${data.sql}</div>
+                        ` : ""}
+                    `;
+                } else {
+                    // Build the results table
+                    let tableHTML = "<table><thead><tr>";
+                    for (const col of data.columns) {
+                        tableHTML += `<th>${col}</th>`;
+                    }
+                    tableHTML += "</tr></thead><tbody>";
+
+                    for (const row of data.rows) {
+                        tableHTML += "<tr>";
+                        for (const val of row) {
+                            tableHTML += `<td>${val !== null ? val : "—"}</td>`;
+                        }
+                        tableHTML += "</tr>";
+                    }
+                    tableHTML += "</tbody></table>";
+
+                    resultsDiv.innerHTML = `
+                        <div class="sql-label">Generated SQL</div>
+                        <div class="sql-display">${data.sql}</div>
+                        <div class="sql-label">Results</div>
+                        <div class="table-wrapper">${tableHTML}</div>
+                        <div class="row-count">${data.row_count} row${data.row_count !== 1 ? "s" : ""} returned</div>
+                    `;
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = `<div class="error">Connection error: ${err.message}</div>`;
+            }
+
+            submitBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
