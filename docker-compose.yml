@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: textosql
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"    # Use 5433
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql  # Auto-run schema on first start
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DB_URL: postgresql://postgres:postgres@db:5432/textosql
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text to SQL Explorer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -38,7 +39,6 @@
             margin-bottom: 32px;
         }
 
-        /* Cards */
         .card {
             background: white;
             border-radius: 12px;
@@ -57,7 +57,6 @@
             align-items: center;
         }
 
-        /* Input area */
         .input-area label {
             font-weight: 500;
             display: block;
@@ -79,9 +78,7 @@
             transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus {
-            border-color: #4f46e5;
-        }
+        input[type="text"]:focus { border-color: #4f46e5; }
 
         button {
             padding: 12px 24px;
@@ -96,19 +93,10 @@
         }
 
         button:hover { background: #4338ca; }
-        button:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
 
-        .examples {
-            margin-top: 16px;
-        }
-
-        .examples span {
-            font-size: 13px;
-            color: #666;
-        }
+        .examples { margin-top: 16px; }
+        .examples span { font-size: 13px; color: #666; }
 
         .example-btn {
             background: #f0efff;
@@ -124,7 +112,6 @@
 
         .example-btn:hover { background: #e0deff; }
 
-        /* Upload area */
         .upload-zone {
             border: 2px dashed #ddd;
             border-radius: 8px;
@@ -135,40 +122,13 @@
             margin-bottom: 16px;
         }
 
-        .upload-zone:hover {
-            border-color: #4f46e5;
-            background: #fafaff;
-        }
-
-        .upload-zone.dragover {
-            border-color: #4f46e5;
-            background: #f0efff;
-        }
-
-        .upload-zone input[type="file"] {
-            display: none;
-        }
-
-        .upload-icon {
-            font-size: 24px;
-            color: #999;
-            margin-bottom: 8px;
-        }
-
-        .upload-text {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .upload-text strong {
-            color: #4f46e5;
-        }
-
-        .upload-hint {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-        }
+        .upload-zone:hover { border-color: #4f46e5; background: #fafaff; }
+        .upload-zone.dragover { border-color: #4f46e5; background: #f0efff; }
+        .upload-zone input[type="file"] { display: none; }
+        .upload-icon { font-size: 24px; color: #999; margin-bottom: 8px; }
+        .upload-text { font-size: 14px; color: #666; }
+        .upload-text strong { color: #4f46e5; }
+        .upload-hint { font-size: 12px; color: #999; margin-top: 4px; }
 
         .upload-status {
             padding: 12px;
@@ -178,24 +138,10 @@
             display: none;
         }
 
-        .upload-status.success {
-            display: block;
-            background: #f0fdf4;
-            color: #166534;
-        }
+        .upload-status.success { display: block; background: #f0fdf4; color: #166534; }
+        .upload-status.error { display: block; background: #fef2f2; color: #dc2626; }
 
-        .upload-status.error {
-            display: block;
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        /* Table list */
-        .table-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .table-list { display: flex; flex-direction: column; gap: 8px; }
 
         .table-item {
             display: flex;
@@ -207,17 +153,8 @@
             font-size: 13px;
         }
 
-        .table-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-        }
-
-        .table-name {
-            font-weight: 600;
-            color: #333;
-        }
+        .table-info { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .table-name { font-weight: 600; color: #333; }
 
         .table-badge {
             padding: 2px 6px;
@@ -227,21 +164,9 @@
             flex-shrink: 0;
         }
 
-        .table-badge.sample {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-
-        .table-badge.uploaded {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .table-meta {
-            color: #999;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
+        .table-badge.sample { background: #e0e7ff; color: #3730a3; }
+        .table-badge.uploaded { background: #d1fae5; color: #065f46; }
+        .table-meta { color: #999; font-size: 12px; flex-shrink: 0; }
 
         .delete-btn {
             padding: 4px 8px;
@@ -252,9 +177,7 @@
             flex-shrink: 0;
         }
 
-        .delete-btn:hover {
-            background: #fecaca;
-        }
+        .delete-btn:hover { background: #fecaca; }
 
         .table-columns {
             font-size: 11px;
@@ -266,7 +189,6 @@
             max-width: 400px;
         }
 
-        /* Results */
         .results {
             background: white;
             border-radius: 12px;
@@ -299,15 +221,9 @@
             letter-spacing: 0.5px;
         }
 
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 16px;
-        }
+        .table-wrapper { overflow-x: auto; margin-top: 16px; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
         th {
             background: #f8f8f8;
@@ -319,19 +235,9 @@
             border-bottom: 2px solid #eee;
         }
 
-        td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-
+        td { padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 14px; }
         tr:hover td { background: #fafafa; }
-
-        .row-count {
-            color: #666;
-            font-size: 13px;
-            margin-top: 12px;
-        }
+        .row-count { color: #666; font-size: 13px; margin-top: 12px; }
 
         .error {
             background: #fef2f2;
@@ -341,11 +247,7 @@
             margin-bottom: 16px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
+        .loading { text-align: center; padding: 40px; color: #666; }
 
         .retry-badge {
             display: inline-block;
@@ -358,38 +260,12 @@
             margin-bottom: 16px;
         }
 
-        .retry-history {
-            margin-bottom: 20px;
-            border-left: 3px solid #e5e7eb;
-            padding-left: 16px;
-        }
+        .retry-history { margin-bottom: 20px; border-left: 3px solid #e5e7eb; padding-left: 16px; }
+        .retry-history summary { cursor: pointer; font-size: 13px; color: #666; margin-bottom: 8px; }
 
-        .retry-history summary {
-            cursor: pointer;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .retry-attempt {
-            margin-bottom: 12px;
-            padding: 12px;
-            background: #fafafa;
-            border-radius: 6px;
-        }
-
-        .retry-attempt .attempt-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #dc2626;
-            margin-bottom: 4px;
-        }
-
-        .retry-attempt .attempt-error {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 6px;
-        }
+        .retry-attempt { margin-bottom: 12px; padding: 12px; background: #fafafa; border-radius: 6px; }
+        .retry-attempt .attempt-label { font-size: 12px; font-weight: 600; color: #dc2626; margin-bottom: 4px; }
+        .retry-attempt .attempt-error { font-size: 13px; color: #666; margin-bottom: 6px; }
 
         .retry-attempt .attempt-sql {
             font-family: "Cascadia Code", "Fira Code", monospace;
@@ -399,11 +275,35 @@
             word-break: break-word;
         }
 
-        /* History sidebar */
-        .sidebar {
-            width: 280px;
-            flex-shrink: 0;
+        /* Chart */
+        .chart-container {
+            margin: 20px 0;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+            position: relative;
+            height: 300px;
         }
+
+        .chart-toggle {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .chart-toggle button {
+            padding: 6px 14px;
+            font-size: 12px;
+            background: #f3f4f6;
+            color: #555;
+            border-radius: 6px;
+        }
+
+        .chart-toggle button:hover { background: #e5e7eb; }
+        .chart-toggle button.active { background: #4f46e5; color: white; }
+
+        /* Sidebar */
+        .sidebar { width: 280px; flex-shrink: 0; }
 
         .sidebar-card {
             background: white;
@@ -432,14 +332,8 @@
             border-radius: 6px;
         }
 
-        .sidebar-header .refresh-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .history-list {
-            max-height: 70vh;
-            overflow-y: auto;
-        }
+        .sidebar-header .refresh-btn:hover { background: #e5e7eb; }
+        .history-list { max-height: 70vh; overflow-y: auto; }
 
         .history-item {
             padding: 12px 16px;
@@ -448,13 +342,8 @@
             transition: background 0.15s;
         }
 
-        .history-item:hover {
-            background: #f9fafb;
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-        }
+        .history-item:hover { background: #f9fafb; }
+        .history-item:last-child { border-bottom: none; }
 
         .history-question {
             font-size: 13px;
@@ -467,13 +356,7 @@
             overflow: hidden;
         }
 
-        .history-meta {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            font-size: 11px;
-            color: #999;
-        }
+        .history-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; color: #999; }
 
         .history-status {
             display: inline-block;
@@ -485,27 +368,13 @@
 
         .history-status.success { background: #22c55e; }
         .history-status.failed { background: #ef4444; }
-
-        .history-empty {
-            padding: 24px 16px;
-            text-align: center;
-            font-size: 13px;
-            color: #999;
-        }
+        .history-empty { padding: 24px 16px; text-align: center; font-size: 13px; color: #999; }
 
         @media (max-width: 800px) {
-            .page-layout {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-            }
-            .sidebar-card {
-                position: static;
-            }
-            .history-list {
-                max-height: 300px;
-            }
+            .page-layout { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .sidebar-card { position: static; }
+            .history-list { max-height: 300px; }
         }
     </style>
 </head>
@@ -515,41 +384,29 @@
             <h1>Text to SQL Explorer</h1>
             <p class="subtitle">Ask questions about any database in plain English</p>
 
-            <!-- Data Management -->
             <div class="card">
                 <div class="card-title">
                     <span>Your data</span>
                     <button class="refresh-btn" onclick="loadTables()" style="padding:4px 10px;font-size:12px;background:#f3f4f6;color:#555;border-radius:6px;">Refresh</button>
                 </div>
-
-                <!-- Upload zone -->
                 <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
                     <input type="file" id="file-input" accept=".csv" onchange="uploadFile(this.files[0])">
                     <div class="upload-icon">+</div>
                     <div class="upload-text"><strong>Click to upload</strong> or drag and drop a CSV file</div>
                     <div class="upload-hint">Max 10MB</div>
                 </div>
-
                 <div class="upload-status" id="upload-status"></div>
-
-                <!-- Table list -->
                 <div class="table-list" id="table-list">
                     <div style="color:#999;font-size:13px;text-align:center;padding:12px;">Loading tables...</div>
                 </div>
             </div>
 
-            <!-- Query input -->
             <div class="card input-area">
                 <label for="question">Your question:</label>
                 <div class="input-row">
-                    <input
-                        type="text"
-                        id="question"
-                        placeholder="e.g. What are the top 5 best-selling products?"
-                    >
+                    <input type="text" id="question" placeholder="e.g. What are the top 5 best-selling products?">
                     <button id="submit-btn" onclick="submitQuestion()">Ask</button>
                 </div>
-
                 <div class="examples">
                     <span>Try these: </span>
                     <button class="example-btn" onclick="tryExample(this)">What are the top 5 products by total revenue?</button>
@@ -576,6 +433,121 @@
     </div>
 
     <script>
+        let currentChart = null;
+
+        // ---- Chart logic ----
+
+        function analyzeChartability(columns, rows) {
+            if (!rows.length || rows.length > 50 || columns.length < 2) return null;
+
+            let labelCol = -1;
+            let numericCols = [];
+
+            for (let c = 0; c < columns.length; c++) {
+                const values = rows.map(r => r[c]);
+                const allNumeric = values.every(v => v !== null && !isNaN(Number(v)));
+
+                if (allNumeric && labelCol !== -1) {
+                    numericCols.push(c);
+                } else if (!allNumeric && labelCol === -1) {
+                    labelCol = c;
+                }
+            }
+
+            if (labelCol === -1 || numericCols.length === 0) return null;
+
+            return { labelCol, numericCols };
+        }
+
+        function renderChart(columns, rows, analysis, type) {
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+
+            const canvas = document.getElementById("result-chart");
+            if (!canvas) return;
+
+            const labels = rows.map(r => String(r[analysis.labelCol]));
+
+            const palette = [
+                "rgba(79, 70, 229, 0.7)",
+                "rgba(16, 185, 129, 0.7)",
+                "rgba(245, 158, 11, 0.7)",
+                "rgba(239, 68, 68, 0.7)",
+                "rgba(139, 92, 246, 0.7)",
+            ];
+
+            const datasets = analysis.numericCols.map((col, i) => ({
+                label: columns[col],
+                data: rows.map(r => Number(r[col])),
+                backgroundColor: palette[i % palette.length],
+                borderColor: palette[i % palette.length].replace("0.7", "1"),
+                borderWidth: type === "line" ? 2 : 1,
+                tension: 0.3,
+                fill: false,
+            }));
+
+            currentChart = new Chart(canvas, {
+                type: type,
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: datasets.length > 1,
+                            position: "top",
+                            labels: { font: { size: 12 } },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: "rgba(0,0,0,0.05)" },
+                            ticks: { font: { size: 11 } },
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 11 },
+                                maxRotation: 45,
+                                autoSkip: true,
+                                maxTicksLimit: 20,
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        function buildChartHTML(columns, rows) {
+            const analysis = analyzeChartability(columns, rows);
+            if (!analysis) return "";
+
+            // Store analysis on window so toggle buttons can access it
+            window._chartAnalysis = analysis;
+            window._chartColumns = columns;
+            window._chartRows = rows;
+
+            return `
+                <div class="sql-label">Visualization</div>
+                <div class="chart-toggle">
+                    <button class="active" onclick="switchChart('bar', this)">Bar</button>
+                    <button onclick="switchChart('line', this)">Line</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="result-chart"></canvas>
+                </div>
+            `;
+        }
+
+        function switchChart(type, btn) {
+            document.querySelectorAll(".chart-toggle button").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            renderChart(window._chartColumns, window._chartRows, window._chartAnalysis, type);
+        }
+
         // ---- Query submission ----
 
         document.getElementById("question").addEventListener("keydown", function(e) {
@@ -593,6 +565,8 @@
 
             const resultsDiv = document.getElementById("results");
             const submitBtn = document.getElementById("submit-btn");
+
+            if (currentChart) { currentChart.destroy(); currentChart = null; }
 
             resultsDiv.className = "results visible";
             resultsDiv.innerHTML = '<div class="loading">Thinking...</div>';
@@ -629,6 +603,10 @@
                         <div class="sql-display">${data.sql}</div>
                     `;
 
+                    // Add chart (before the table)
+                    html += buildChartHTML(data.columns, data.rows);
+
+                    // Build results table
                     let tableHTML = "<table><thead><tr>";
                     for (const col of data.columns) tableHTML += `<th>${col}</th>`;
                     tableHTML += "</tr></thead><tbody>";
@@ -644,7 +622,14 @@
                         <div class="table-wrapper">${tableHTML}</div>
                         <div class="row-count">${data.row_count} row${data.row_count !== 1 ? "s" : ""} returned</div>
                     `;
+
                     resultsDiv.innerHTML = html;
+
+                    // Render the chart now that canvas is in the DOM
+                    const analysis = analyzeChartability(data.columns, data.rows);
+                    if (analysis) {
+                        renderChart(data.columns, data.rows, analysis, "bar");
+                    }
                 }
             } catch (err) {
                 resultsDiv.innerHTML = `<div class="error">Connection error: ${err.message}</div>`;
@@ -703,9 +688,7 @@
                     `;
                 }
                 listDiv.innerHTML = html;
-            } catch (err) {
-                // Silently fail
-            }
+            } catch (err) {}
         }
 
         function rerunQuery(question) {
@@ -729,9 +712,7 @@
         uploadZone.addEventListener("drop", function(e) {
             e.preventDefault();
             this.classList.remove("dragover");
-            if (e.dataTransfer.files.length > 0) {
-                uploadFile(e.dataTransfer.files[0]);
-            }
+            if (e.dataTransfer.files.length > 0) uploadFile(e.dataTransfer.files[0]);
         });
 
         async function uploadFile(file) {
@@ -763,11 +744,7 @@
             formData.append("file", file);
 
             try {
-                const response = await fetch("/upload", {
-                    method: "POST",
-                    body: formData,
-                });
-
+                const response = await fetch("/upload", { method: "POST", body: formData });
                 const data = await response.json();
 
                 if (data.error) {
@@ -783,7 +760,6 @@
                 status.textContent = `Upload failed: ${err.message}`;
             }
 
-            // Reset the file input so the same file can be re-uploaded
             document.getElementById("file-input").value = "";
         }
 
@@ -826,23 +802,16 @@
                     `;
                 }
                 listDiv.innerHTML = html;
-            } catch (err) {
-                // Silently fail
-            }
+            } catch (err) {}
         }
 
         async function deleteTable(name) {
             if (!confirm(`Delete table "${name}"? This cannot be undone.`)) return;
-
             try {
                 const response = await fetch(`/tables/${name}`, { method: "DELETE" });
                 const data = await response.json();
-
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    loadTables();
-                }
+                if (data.error) alert(data.error);
+                else loadTables();
             } catch (err) {
                 alert(`Delete failed: ${err.message}`);
             }
