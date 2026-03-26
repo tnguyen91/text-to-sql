@@ -31,7 +31,6 @@
             margin-bottom: 32px;
         }
 
-        /* The question input area */
         .input-area {
             background: white;
             border-radius: 12px;
@@ -83,7 +82,6 @@
             cursor: not-allowed;
         }
 
-        /* Example questions */
         .examples {
             margin-top: 16px;
         }
@@ -107,7 +105,6 @@
 
         .example-btn:hover { background: #e0deff; }
 
-        /* Results area */
         .results {
             background: white;
             border-radius: 12px;
@@ -140,7 +137,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Results table */
         .table-wrapper {
             overflow-x: auto;
             margin-top: 16px;
@@ -188,6 +184,58 @@
             padding: 40px;
             color: #666;
         }
+
+        .retry-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .retry-history {
+            margin-bottom: 20px;
+            border-left: 3px solid #e5e7eb;
+            padding-left: 16px;
+        }
+
+        .retry-history summary {
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .retry-attempt {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 6px;
+        }
+
+        .retry-attempt .attempt-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 4px;
+        }
+
+        .retry-attempt .attempt-error {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .retry-attempt .attempt-sql {
+            font-family: "Cascadia Code", "Fira Code", monospace;
+            font-size: 12px;
+            color: #888;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
     </style>
 </head>
 <body>
@@ -215,13 +263,10 @@
             </div>
         </div>
 
-        <div class="results" id="results">
-            <!-- Results appear here dynamically -->
-        </div>
+        <div class="results" id="results"></div>
     </div>
 
     <script>
-        // Let the user press Enter to submit
         document.getElementById("question").addEventListener("keydown", function(e) {
             if (e.key === "Enter") submitQuestion();
         });
@@ -238,13 +283,11 @@
             const resultsDiv = document.getElementById("results");
             const submitBtn = document.getElementById("submit-btn");
 
-            // Show loading state
             resultsDiv.className = "results visible";
             resultsDiv.innerHTML = '<div class="loading">Thinking...</div>';
             submitBtn.disabled = true;
 
             try {
-                // Send the question to our Flask server
                 const response = await fetch("/query", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -254,15 +297,39 @@
                 const data = await response.json();
 
                 if (data.error) {
-                    // Something went wrong
-                    resultsDiv.innerHTML = `
-                        <div class="error">${data.error}</div>
-                        ${data.sql ? `
-                            <div class="sql-label">Generated SQL</div>
+                    let html = `<div class="error">${data.error}</div>`;
+
+                    if (data.retry_history) {
+                        html += buildRetryHistory(data.retry_history);
+                    }
+
+                    if (data.sql) {
+                        html += `
+                            <div class="sql-label">Last generated SQL</div>
                             <div class="sql-display">${data.sql}</div>
-                        ` : ""}
-                    `;
+                        `;
+                    }
+
+                    resultsDiv.innerHTML = html;
                 } else {
+                    let html = "";
+
+                    // Show retry badge if it took multiple attempts
+                    if (data.attempts > 1) {
+                        html += `<div class="retry-badge">Self-corrected after ${data.attempts} attempts</div>`;
+                    }
+
+                    // Show retry history if available
+                    if (data.retry_history) {
+                        html += buildRetryHistory(data.retry_history);
+                    }
+
+                    // Show the final successful SQL
+                    html += `
+                        <div class="sql-label">Generated SQL${data.attempts > 1 ? " (final, working version)" : ""}</div>
+                        <div class="sql-display">${data.sql}</div>
+                    `;
+
                     // Build the results table
                     let tableHTML = "<table><thead><tr>";
                     for (const col of data.columns) {
@@ -279,19 +346,34 @@
                     }
                     tableHTML += "</tbody></table>";
 
-                    resultsDiv.innerHTML = `
-                        <div class="sql-label">Generated SQL</div>
-                        <div class="sql-display">${data.sql}</div>
+                    html += `
                         <div class="sql-label">Results</div>
                         <div class="table-wrapper">${tableHTML}</div>
                         <div class="row-count">${data.row_count} row${data.row_count !== 1 ? "s" : ""} returned</div>
                     `;
+
+                    resultsDiv.innerHTML = html;
                 }
             } catch (err) {
                 resultsDiv.innerHTML = `<div class="error">Connection error: ${err.message}</div>`;
             }
 
             submitBtn.disabled = false;
+        }
+
+        function buildRetryHistory(history) {
+            let html = '<details class="retry-history"><summary>View failed attempts (' + history.length + ')</summary>';
+            for (const attempt of history) {
+                html += `
+                    <div class="retry-attempt">
+                        <div class="attempt-label">Attempt ${attempt.attempt} — failed</div>
+                        <div class="attempt-error">${attempt.error}</div>
+                        <div class="attempt-sql">${attempt.sql}</div>
+                    </div>
+                `;
+            }
+            html += '</details>';
+            return html;
         }
     </script>
 </body>
