@@ -48,6 +48,17 @@ CREATE TABLE reviews (
     review_date DATE DEFAULT CURRENT_DATE
 );
 
+CREATE TABLE query_history (
+    id SERIAL PRIMARY KEY,
+    question TEXT NOT NULL,
+    generated_sql TEXT,
+    success BOOLEAN NOT NULL DEFAULT false,
+    attempts INTEGER DEFAULT 1,
+    error_message TEXT,
+    row_count INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Seed data
 
 INSERT INTO categories (name) VALUES

@@ -24,6 +24,9 @@ def get_schema_description():
     schema_parts = []
 
     for table_name in inspector.get_table_names():
+        if table_name == "query_history":
+            continue
+
         columns = inspector.get_columns(table_name)
         column_descriptions = []
         for col in columns:
@@ -116,6 +119,26 @@ def execute_sql(sql):
  
     return columns, rows
 
+def save_query(question, sql, success, attempts, error_message=None, row_count=None):
+    try:
+        with engine.connect() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO query_history (question, generated_sql, success, attempts, error_message, row_count) "
+                    "VALUES (:question, :sql, :success, :attempts, :error, :row_count)"
+                ),
+                {
+                    "question": question,
+                    "sql": sql,
+                    "success": success,
+                    "attempts": attempts,
+                    "error": error_message,
+                    "row_count": row_count,
+                },
+            )
+            conn.commit()
+    except Exception:
+        pass  # Don't let history-saving errors break the main app
 
 @app.route("/")
 def home():
@@ -175,6 +198,8 @@ def handle_query():
             if attempt > 1:
                 result["retry_history"] = attempts
  
+            save_query(user_question, sql, True, attempt, row_count=len(rows))
+
             return jsonify(result)
  
         except Exception as e:
@@ -187,12 +212,37 @@ def handle_query():
             })
             # Continue to next retry (unless we've exhausted attempts)
  
+    save_query(user_question, last_sql, False, MAX_RETRIES, error_message=last_error)
+
     # All retries failed
     return jsonify({
         "error": f"Failed after {MAX_RETRIES} attempts. Last error: {last_error}",
         "sql": last_sql,
         "retry_history": attempts,
     })
+
+@app.route("/history")
+def get_history():
+    """Return the 20 most recent queries."""
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(
+                "SELECT id, question, generated_sql, success, attempts, row_count, created_at "
+                "FROM query_history ORDER BY created_at DESC LIMIT 20"
+            )
+        )
+        history = []
+        for row in result.fetchall():
+            history.append({
+                "id": row[0],
+                "question": row[1],
+                "sql": row[2],
+                "success": row[3],
+                "attempts": row[4],
+                "row_count": row[5],
+                "created_at": row[6].isoformat() if row[6] else None,
+            })
+    return jsonify(history)
 
 if __name__ == "__main__":
     app.run(debug=True)

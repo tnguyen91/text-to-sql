@@ -14,10 +14,17 @@
             min-height: 100vh;
         }
 
-        .container {
-            max-width: 900px;
+        .page-layout {
+            display: flex;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
+            gap: 24px;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
         }
 
         h1 {
@@ -236,34 +243,157 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
+
+        /* History sidebar */
+        .history-panel {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .history-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+        }
+
+        .history-header {
+            padding: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-header .refresh-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            background: #f3f4f6;
+            color: #555;
+            border-radius: 6px;
+        }
+
+        .history-header .refresh-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .history-list {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .history-item:hover {
+            background: #f9fafb;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-question {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .history-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .history-status {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .history-status.success { background: #22c55e; }
+        .history-status.failed { background: #ef4444; }
+
+        .history-empty {
+            padding: 24px 16px;
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* Responsive: stack sidebar below on small screens */
+        @media (max-width: 800px) {
+            .page-layout {
+                flex-direction: column;
+            }
+            .history-panel {
+                width: 100%;
+            }
+            .history-card {
+                position: static;
+            }
+            .history-list {
+                max-height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Text to SQL Explorer</h1>
-        <p class="subtitle">Ask questions about the database in plain English</p>
+    <div class="page-layout">
+        <div class="main-content">
+            <h1>Text to SQL Explorer</h1>
+            <p class="subtitle">Ask questions about the database in plain English</p>
 
-        <div class="input-area">
-            <label for="question">Your question:</label>
-            <div class="input-row">
-                <input
-                    type="text"
-                    id="question"
-                    placeholder="e.g. What are the top 5 best-selling products?"
-                >
-                <button id="submit-btn" onclick="submitQuestion()">Ask</button>
+            <div class="input-area">
+                <label for="question">Your question:</label>
+                <div class="input-row">
+                    <input
+                        type="text"
+                        id="question"
+                        placeholder="e.g. What are the top 5 best-selling products?"
+                    >
+                    <button id="submit-btn" onclick="submitQuestion()">Ask</button>
+                </div>
+
+                <div class="examples">
+                    <span>Try these: </span>
+                    <button class="example-btn" onclick="tryExample(this)">What are the top 5 products by total revenue?</button>
+                    <button class="example-btn" onclick="tryExample(this)">Which customers from California have spent the most?</button>
+                    <button class="example-btn" onclick="tryExample(this)">What is the average rating for each product category?</button>
+                    <button class="example-btn" onclick="tryExample(this)">Show me all orders from March 2025 with their items</button>
+                </div>
             </div>
 
-            <div class="examples">
-                <span>Try these: </span>
-                <button class="example-btn" onclick="tryExample(this)">What are the top 5 products by total revenue?</button>
-                <button class="example-btn" onclick="tryExample(this)">Which customers from California have spent the most?</button>
-                <button class="example-btn" onclick="tryExample(this)">What is the average rating for each product category?</button>
-                <button class="example-btn" onclick="tryExample(this)">Show me all orders from March 2025 with their items</button>
-            </div>
+            <div class="results" id="results"></div>
         </div>
 
-        <div class="results" id="results"></div>
+        <div class="history-panel">
+            <div class="history-card">
+                <div class="history-header">
+                    <span>Query history</span>
+                    <button class="refresh-btn" onclick="loadHistory()">Refresh</button>
+                </div>
+                <div class="history-list" id="history-list">
+                    <div class="history-empty">No queries yet. Ask a question!</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -314,23 +444,19 @@
                 } else {
                     let html = "";
 
-                    // Show retry badge if it took multiple attempts
                     if (data.attempts > 1) {
                         html += `<div class="retry-badge">Self-corrected after ${data.attempts} attempts</div>`;
                     }
 
-                    // Show retry history if available
                     if (data.retry_history) {
                         html += buildRetryHistory(data.retry_history);
                     }
 
-                    // Show the final successful SQL
                     html += `
                         <div class="sql-label">Generated SQL${data.attempts > 1 ? " (final, working version)" : ""}</div>
                         <div class="sql-display">${data.sql}</div>
                     `;
 
-                    // Build the results table
                     let tableHTML = "<table><thead><tr>";
                     for (const col of data.columns) {
                         tableHTML += `<th>${col}</th>`;
@@ -359,6 +485,8 @@
             }
 
             submitBtn.disabled = false;
+
+            loadHistory();
         }
 
         function buildRetryHistory(history) {
@@ -375,6 +503,50 @@
             html += '</details>';
             return html;
         }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch("/history");
+                const history = await response.json();
+                const listDiv = document.getElementById("history-list");
+
+                if (history.length === 0) {
+                    listDiv.innerHTML = '<div class="history-empty">No queries yet. Ask a question!</div>';
+                    return;
+                }
+
+                let html = "";
+                for (const item of history) {
+                    const time = new Date(item.created_at).toLocaleString([], {
+                        month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
+                    });
+                    const statusClass = item.success ? "success" : "failed";
+                    const meta = item.success
+                        ? `${item.row_count ?? 0} rows · ${item.attempts > 1 ? item.attempts + " attempts · " : ""}${time}`
+                        : `Failed · ${time}`;
+
+                    html += `
+                        <div class="history-item" onclick="rerunQuery('${item.question.replace(/'/g, "\\'")}')">
+                            <div class="history-question">${item.question}</div>
+                            <div class="history-meta">
+                                <span class="history-status ${statusClass}"></span>
+                                <span>${meta}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                listDiv.innerHTML = html;
+            } catch (err) {
+            }
+        }
+
+        function rerunQuery(question) {
+            document.getElementById("question").value = question;
+            submitQuestion();
+        }
+
+        loadHistory();
     </script>
 </body>
 </html>
