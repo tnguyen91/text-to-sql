@@ -1,4 +1,6 @@
 import os
+import re
+import pandas as pd
 from flask import Flask, render_template, request, jsonify
 from sqlalchemy import create_engine, text, inspect
 from anthropic import Anthropic
@@ -9,6 +11,7 @@ load_dotenv()
 
 # Set up Flask
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB max upload size
 
 # Connect to PostgreSQL database
 engine = create_engine(os.getenv("DB_URL"))
@@ -17,6 +20,9 @@ engine = create_engine(os.getenv("DB_URL"))
 client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 MAX_RETRIES = 3
+
+# Tables that are part of the app itself
+PROTECTED_TABLES = {"categories", "customers", "products", "orders", "order_items", "reviews", "query_history"}
 
 
 def get_schema_description():
@@ -59,8 +65,7 @@ def generate_sql(user_question, schema, failed_sql=None, error_message=None):
         "- Always alias columns for readability\n"
         f"\nDATABASE SCHEMA:\n{schema}"
     )
- 
-    # Build the message
+
     if failed_sql and error_message:
         user_content = (
             f"Original question: {user_question}\n\n"
@@ -70,7 +75,7 @@ def generate_sql(user_question, schema, failed_sql=None, error_message=None):
         )
     else:
         user_content = user_question
- 
+
     response = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
@@ -82,20 +87,19 @@ def generate_sql(user_question, schema, failed_sql=None, error_message=None):
             }
         ],
     )
- 
+
     return response.content[0].text.strip()
 
-def validate_sql(sql = None):
+
+def validate_sql(sql=None):
     if not sql:
         return False, "No SQL provided."
 
     sql_upper = sql.upper().strip()
 
-    # Must start with SELECT or WITH (for CTEs)
     if not sql_upper.startswith("SELECT") and not sql_upper.startswith("WITH"):
         return False, "Only SELECT queries are allowed."
 
-    # Block dangerous keywords
     dangerous = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "TRUNCATE", "EXEC", "EXECUTE"]
     for keyword in dangerous:
         if f" {keyword} " in f" {sql_upper} ":
@@ -103,28 +107,30 @@ def validate_sql(sql = None):
 
     return True, "OK"
 
+
 def execute_sql(sql):
     with engine.connect() as conn:
         result = conn.execute(text(sql))
         columns = list(result.keys())
         rows = [list(row) for row in result.fetchall()]
- 
-        # Convert any non-serializable types (like Decimal) to float
+
         for i, row in enumerate(rows):
             for j, val in enumerate(row):
-                if hasattr(val, "as_integer_ratio"):  # It's a Decimal
+                if hasattr(val, "as_integer_ratio"):
                     rows[i][j] = float(val)
-                elif hasattr(val, "isoformat"):  # It's a date
+                elif hasattr(val, "isoformat"):
                     rows[i][j] = val.isoformat()
- 
+
     return columns, rows
+
 
 def save_query(question, sql, success, attempts, error_message=None, row_count=None):
     try:
         with engine.connect() as conn:
             conn.execute(
                 text(
-                    "INSERT INTO query_history (question, generated_sql, success, attempts, error_message, row_count) "
+                    "INSERT INTO query_history "
+                    "(question, generated_sql, success, attempts, error_message, row_count) "
                     "VALUES (:question, :sql, :success, :attempts, :error, :row_count)"
                 ),
                 {
@@ -138,92 +144,33 @@ def save_query(question, sql, success, attempts, error_message=None, row_count=N
             )
             conn.commit()
     except Exception:
-        pass  # Don't let history-saving errors break the main app
+        pass
+
+
+def sanitize_table_name(name):
+    # Remove file extension
+    name = os.path.splitext(name)[0]
+    # Replace any non-alphanumeric character with underscore
+    name = re.sub(r"[^a-zA-Z0-9]", "_", name)
+    # Remove leading/trailing underscores and collapse multiples
+    name = re.sub(r"_+", "_", name).strip("_")
+    # Lowercase
+    name = name.lower()
+    # Ensure it doesn't start with a number
+    if name and name[0].isdigit():
+        name = "t_" + name
+    # Truncate to 63 chars (PostgreSQL limit)
+    name = name[:63]
+    return name or "uploaded_data"
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-@app.route("/query", methods=["POST"])
-def handle_query():
-    data = request.get_json(silent=True) or {}
-    user_question = (data.get("question") or "").strip()
- 
-    if not user_question:
-        return jsonify({"error": "Please enter a question."}), 400
- 
-    # Get the schema (once - reused across retries)
-    schema = get_schema_description()
- 
-    # Track all attempts for transparency
-    attempts = []
-    last_sql = None
-    last_error = None
- 
-    for attempt in range(1, MAX_RETRIES + 1):
-        sql = None
-        try:
-            # Generate SQL (with error context if retrying)
-            if attempt == 1:
-                sql = generate_sql(user_question, schema)
-            else:
-                sql = generate_sql(user_question, schema, last_sql, last_error)
- 
-            # Validate the SQL
-            is_safe, message = validate_sql(sql)
-            if not is_safe:
-                last_sql = sql
-                last_error = f"Validation failed: {message}"
-                attempts.append({
-                    "attempt": attempt,
-                    "sql": sql,
-                    "error": last_error,
-                })
-                continue  # Try again
- 
-            # Execute the query
-            columns, rows = execute_sql(sql)
- 
-            # Success - Return results with attempt info
-            result = {
-                "sql": sql,
-                "columns": columns,
-                "rows": rows,
-                "row_count": len(rows),
-                "attempts": attempt,
-            }
- 
-            # If it took retries, include the history so the user can see
-            if attempt > 1:
-                result["retry_history"] = attempts
- 
-            save_query(user_question, sql, True, attempt, row_count=len(rows))
-
-            return jsonify(result)
- 
-        except Exception as e:
-            last_sql = sql
-            last_error = str(e)
-            attempts.append({
-                "attempt": attempt,
-                "sql": sql or "",
-                "error": last_error,
-            })
-            # Continue to next retry (unless we've exhausted attempts)
- 
-    save_query(user_question, last_sql, False, MAX_RETRIES, error_message=last_error)
-
-    # All retries failed
-    return jsonify({
-        "error": f"Failed after {MAX_RETRIES} attempts. Last error: {last_error}",
-        "sql": last_sql,
-        "retry_history": attempts,
-    })
-
 @app.route("/history")
 def get_history():
-    """Return the 20 most recent queries."""
     with engine.connect() as conn:
         result = conn.execute(
             text(
@@ -243,6 +190,174 @@ def get_history():
                 "created_at": row[6].isoformat() if row[6] else None,
             })
     return jsonify(history)
+
+
+@app.route("/tables")
+def list_tables():
+    inspector = inspect(engine)
+    tables = []
+    for table_name in inspector.get_table_names():
+        if table_name == "query_history":
+            continue
+        with engine.connect() as conn:
+            count = conn.execute(text(f'SELECT COUNT(*) FROM "{table_name}"')).scalar()
+        columns = [col["name"] for col in inspector.get_columns(table_name)]
+        tables.append({
+            "name": table_name,
+            "row_count": count,
+            "column_count": len(columns),
+            "columns": columns,
+            "is_sample": table_name in PROTECTED_TABLES,
+        })
+    return jsonify(tables)
+
+
+@app.route("/upload", methods=["POST"])
+def upload_csv():
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided."}), 400
+
+    file = request.files["file"]
+
+    if not file.filename:
+        return jsonify({"error": "No file selected."}), 400
+
+    if not file.filename.lower().endswith(".csv"):
+        return jsonify({"error": "Only CSV files are supported."}), 400
+
+    # Generate a safe table name from the filename
+    table_name = sanitize_table_name(file.filename)
+
+    # Check if it would conflict with a protected table
+    if table_name in PROTECTED_TABLES:
+        table_name = "uploaded_" + table_name
+
+    try:
+        # Read the CSV into a pandas DataFrame
+        df = pd.read_csv(file)
+
+        if df.empty:
+            return jsonify({"error": "The CSV file is empty."}), 400
+
+        if len(df.columns) < 1:
+            return jsonify({"error": "The CSV file has no columns."}), 400
+
+        # Clean up column names for PostgreSQL
+        df.columns = [
+            re.sub(r"[^a-zA-Z0-9]", "_", col).strip("_").lower()
+            for col in df.columns
+        ]
+
+        # Drop the existing table if re-uploading the same file
+        with engine.connect() as conn:
+            conn.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
+            conn.commit()
+
+        # Write the DataFrame to PostgreSQL
+        df.to_sql(table_name, engine, index=False, if_exists="replace")
+
+        return jsonify({
+            "message": f"Table '{table_name}' created successfully.",
+            "table_name": table_name,
+            "row_count": len(df),
+            "columns": list(df.columns),
+        })
+
+    except pd.errors.EmptyDataError:
+        return jsonify({"error": "The CSV file is empty or malformed."}), 400
+    except pd.errors.ParserError as e:
+        return jsonify({"error": f"Could not parse CSV: {str(e)}"}), 400
+    except Exception as e:
+        return jsonify({"error": f"Upload failed: {str(e)}"}), 500
+
+
+@app.route("/tables/<table_name>", methods=["DELETE"])
+def delete_table(table_name):
+    if table_name in PROTECTED_TABLES:
+        return jsonify({"error": "Cannot delete sample data tables."}), 403
+
+    try:
+        # Verify the table actually exists
+        inspector = inspect(engine)
+        if table_name not in inspector.get_table_names():
+            return jsonify({"error": f"Table '{table_name}' not found."}), 404
+
+        with engine.connect() as conn:
+            conn.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
+            conn.commit()
+
+        return jsonify({"message": f"Table '{table_name}' deleted."})
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete table: {str(e)}"}), 500
+
+
+@app.route("/query", methods=["POST"])
+def handle_query():
+    data = request.get_json(silent=True) or {}
+    user_question = (data.get("question") or "").strip()
+
+    if not user_question:
+        return jsonify({"error": "Please enter a question."}), 400
+
+    schema = get_schema_description()
+
+    attempts = []
+    last_sql = None
+    last_error = None
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        sql = None
+        try:
+            if attempt == 1:
+                sql = generate_sql(user_question, schema)
+            else:
+                sql = generate_sql(user_question, schema, last_sql, last_error)
+
+            is_safe, message = validate_sql(sql)
+            if not is_safe:
+                last_sql = sql
+                last_error = f"Validation failed: {message}"
+                attempts.append({
+                    "attempt": attempt,
+                    "sql": sql,
+                    "error": last_error,
+                })
+                continue
+
+            columns, rows = execute_sql(sql)
+
+            result = {
+                "sql": sql,
+                "columns": columns,
+                "rows": rows,
+                "row_count": len(rows),
+                "attempts": attempt,
+            }
+
+            if attempt > 1:
+                result["retry_history"] = attempts
+
+            save_query(user_question, sql, True, attempt, row_count=len(rows))
+
+            return jsonify(result)
+
+        except Exception as e:
+            last_sql = sql
+            last_error = str(e)
+            attempts.append({
+                "attempt": attempt,
+                "sql": sql or "",
+                "error": last_error,
+            })
+
+    save_query(user_question, last_sql, False, MAX_RETRIES, error_message=last_error)
+
+    return jsonify({
+        "error": f"Failed after {MAX_RETRIES} attempts. Last error: {last_error}",
+        "sql": last_sql,
+        "retry_history": attempts,
+    })
+
 
 if __name__ == "__main__":
     app.run(debug=True)

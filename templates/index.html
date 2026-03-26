@@ -38,7 +38,8 @@
             margin-bottom: 32px;
         }
 
-        .input-area {
+        /* Cards */
+        .card {
             background: white;
             border-radius: 12px;
             padding: 24px;
@@ -46,6 +47,17 @@
             margin-bottom: 24px;
         }
 
+        .card-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Input area */
         .input-area label {
             font-weight: 500;
             display: block;
@@ -112,6 +124,149 @@
 
         .example-btn:hover { background: #e0deff; }
 
+        /* Upload area */
+        .upload-zone {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .upload-zone:hover {
+            border-color: #4f46e5;
+            background: #fafaff;
+        }
+
+        .upload-zone.dragover {
+            border-color: #4f46e5;
+            background: #f0efff;
+        }
+
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .upload-text strong {
+            color: #4f46e5;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .upload-status {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .upload-status.success {
+            display: block;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .upload-status.error {
+            display: block;
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        /* Table list */
+        .table-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .table-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .table-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .table-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .table-badge.sample {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .table-badge.uploaded {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .table-meta {
+            color: #999;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .delete-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+
+        .table-columns {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 400px;
+        }
+
+        /* Results */
         .results {
             background: white;
             border-radius: 12px;
@@ -245,12 +400,12 @@
         }
 
         /* History sidebar */
-        .history-panel {
+        .sidebar {
             width: 280px;
             flex-shrink: 0;
         }
 
-        .history-card {
+        .sidebar-card {
             background: white;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -259,7 +414,7 @@
             top: 20px;
         }
 
-        .history-header {
+        .sidebar-header {
             padding: 16px;
             font-weight: 600;
             font-size: 14px;
@@ -269,7 +424,7 @@
             align-items: center;
         }
 
-        .history-header .refresh-btn {
+        .sidebar-header .refresh-btn {
             padding: 4px 10px;
             font-size: 12px;
             background: #f3f4f6;
@@ -277,7 +432,7 @@
             border-radius: 6px;
         }
 
-        .history-header .refresh-btn:hover {
+        .sidebar-header .refresh-btn:hover {
             background: #e5e7eb;
         }
 
@@ -307,6 +462,7 @@
             margin-bottom: 6px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -337,15 +493,14 @@
             color: #999;
         }
 
-        /* Responsive: stack sidebar below on small screens */
         @media (max-width: 800px) {
             .page-layout {
                 flex-direction: column;
             }
-            .history-panel {
+            .sidebar {
                 width: 100%;
             }
-            .history-card {
+            .sidebar-card {
                 position: static;
             }
             .history-list {
@@ -358,9 +513,33 @@
     <div class="page-layout">
         <div class="main-content">
             <h1>Text to SQL Explorer</h1>
-            <p class="subtitle">Ask questions about the database in plain English</p>
+            <p class="subtitle">Ask questions about any database in plain English</p>
 
-            <div class="input-area">
+            <!-- Data Management -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Your data</span>
+                    <button class="refresh-btn" onclick="loadTables()" style="padding:4px 10px;font-size:12px;background:#f3f4f6;color:#555;border-radius:6px;">Refresh</button>
+                </div>
+
+                <!-- Upload zone -->
+                <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                    <input type="file" id="file-input" accept=".csv" onchange="uploadFile(this.files[0])">
+                    <div class="upload-icon">+</div>
+                    <div class="upload-text"><strong>Click to upload</strong> or drag and drop a CSV file</div>
+                    <div class="upload-hint">Max 10MB</div>
+                </div>
+
+                <div class="upload-status" id="upload-status"></div>
+
+                <!-- Table list -->
+                <div class="table-list" id="table-list">
+                    <div style="color:#999;font-size:13px;text-align:center;padding:12px;">Loading tables...</div>
+                </div>
+            </div>
+
+            <!-- Query input -->
+            <div class="card input-area">
                 <label for="question">Your question:</label>
                 <div class="input-row">
                     <input
@@ -383,9 +562,9 @@
             <div class="results" id="results"></div>
         </div>
 
-        <div class="history-panel">
-            <div class="history-card">
-                <div class="history-header">
+        <div class="sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-header">
                     <span>Query history</span>
                     <button class="refresh-btn" onclick="loadHistory()">Refresh</button>
                 </div>
@@ -397,6 +576,8 @@
     </div>
 
     <script>
+        // ---- Query submission ----
+
         document.getElementById("question").addEventListener("keydown", function(e) {
             if (e.key === "Enter") submitQuestion();
         });
@@ -428,29 +609,20 @@
 
                 if (data.error) {
                     let html = `<div class="error">${data.error}</div>`;
-
-                    if (data.retry_history) {
-                        html += buildRetryHistory(data.retry_history);
-                    }
-
+                    if (data.retry_history) html += buildRetryHistory(data.retry_history);
                     if (data.sql) {
                         html += `
                             <div class="sql-label">Last generated SQL</div>
                             <div class="sql-display">${data.sql}</div>
                         `;
                     }
-
                     resultsDiv.innerHTML = html;
                 } else {
                     let html = "";
-
                     if (data.attempts > 1) {
                         html += `<div class="retry-badge">Self-corrected after ${data.attempts} attempts</div>`;
                     }
-
-                    if (data.retry_history) {
-                        html += buildRetryHistory(data.retry_history);
-                    }
+                    if (data.retry_history) html += buildRetryHistory(data.retry_history);
 
                     html += `
                         <div class="sql-label">Generated SQL${data.attempts > 1 ? " (final, working version)" : ""}</div>
@@ -458,16 +630,11 @@
                     `;
 
                     let tableHTML = "<table><thead><tr>";
-                    for (const col of data.columns) {
-                        tableHTML += `<th>${col}</th>`;
-                    }
+                    for (const col of data.columns) tableHTML += `<th>${col}</th>`;
                     tableHTML += "</tr></thead><tbody>";
-
                     for (const row of data.rows) {
                         tableHTML += "<tr>";
-                        for (const val of row) {
-                            tableHTML += `<td>${val !== null ? val : "—"}</td>`;
-                        }
+                        for (const val of row) tableHTML += `<td>${val !== null ? val : "—"}</td>`;
                         tableHTML += "</tr>";
                     }
                     tableHTML += "</tbody></table>";
@@ -477,7 +644,6 @@
                         <div class="table-wrapper">${tableHTML}</div>
                         <div class="row-count">${data.row_count} row${data.row_count !== 1 ? "s" : ""} returned</div>
                     `;
-
                     resultsDiv.innerHTML = html;
                 }
             } catch (err) {
@@ -485,7 +651,6 @@
             }
 
             submitBtn.disabled = false;
-
             loadHistory();
         }
 
@@ -503,6 +668,8 @@
             html += '</details>';
             return html;
         }
+
+        // ---- History ----
 
         async function loadHistory() {
             try {
@@ -535,9 +702,9 @@
                         </div>
                     `;
                 }
-
                 listDiv.innerHTML = html;
             } catch (err) {
+                // Silently fail
             }
         }
 
@@ -546,7 +713,144 @@
             submitQuestion();
         }
 
+        // ---- File upload ----
+
+        const uploadZone = document.getElementById("upload-zone");
+
+        uploadZone.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            this.classList.add("dragover");
+        });
+
+        uploadZone.addEventListener("dragleave", function() {
+            this.classList.remove("dragover");
+        });
+
+        uploadZone.addEventListener("drop", function(e) {
+            e.preventDefault();
+            this.classList.remove("dragover");
+            if (e.dataTransfer.files.length > 0) {
+                uploadFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        async function uploadFile(file) {
+            if (!file) return;
+
+            const status = document.getElementById("upload-status");
+            status.className = "upload-status";
+            status.style.display = "none";
+
+            if (!file.name.toLowerCase().endsWith(".csv")) {
+                status.className = "upload-status error";
+                status.textContent = "Only CSV files are supported.";
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                status.className = "upload-status error";
+                status.textContent = "File too large. Maximum size is 10MB.";
+                return;
+            }
+
+            status.className = "upload-status";
+            status.style.display = "block";
+            status.style.background = "#f0f0f0";
+            status.style.color = "#666";
+            status.textContent = `Uploading ${file.name}...`;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch("/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    status.className = "upload-status error";
+                    status.textContent = data.error;
+                } else {
+                    status.className = "upload-status success";
+                    status.textContent = `${data.message} (${data.row_count} rows, ${data.columns.length} columns)`;
+                    loadTables();
+                }
+            } catch (err) {
+                status.className = "upload-status error";
+                status.textContent = `Upload failed: ${err.message}`;
+            }
+
+            // Reset the file input so the same file can be re-uploaded
+            document.getElementById("file-input").value = "";
+        }
+
+        // ---- Table management ----
+
+        async function loadTables() {
+            try {
+                const response = await fetch("/tables");
+                const tables = await response.json();
+                const listDiv = document.getElementById("table-list");
+
+                if (tables.length === 0) {
+                    listDiv.innerHTML = '<div style="color:#999;font-size:13px;text-align:center;padding:12px;">No tables yet.</div>';
+                    return;
+                }
+
+                let html = "";
+                for (const t of tables) {
+                    const badge = t.is_sample
+                        ? '<span class="table-badge sample">sample</span>'
+                        : '<span class="table-badge uploaded">uploaded</span>';
+                    const deleteBtn = t.is_sample
+                        ? ''
+                        : `<button class="delete-btn" onclick="deleteTable('${t.name}')">Delete</button>`;
+
+                    html += `
+                        <div class="table-item">
+                            <div style="min-width:0">
+                                <div class="table-info">
+                                    <span class="table-name">${t.name}</span>
+                                    ${badge}
+                                </div>
+                                <div class="table-columns">${t.columns.join(", ")}</div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span class="table-meta">${t.row_count} rows</span>
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                    `;
+                }
+                listDiv.innerHTML = html;
+            } catch (err) {
+                // Silently fail
+            }
+        }
+
+        async function deleteTable(name) {
+            if (!confirm(`Delete table "${name}"? This cannot be undone.`)) return;
+
+            try {
+                const response = await fetch(`/tables/${name}`, { method: "DELETE" });
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    loadTables();
+                }
+            } catch (err) {
+                alert(`Delete failed: ${err.message}`);
+            }
+        }
+
+        // ---- Initialize ----
         loadHistory();
+        loadTables();
     </script>
 </body>
 </html>
