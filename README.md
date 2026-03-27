@@ -1,30 +1,25 @@
 # Text-to-SQL Explorer
 
-A web app that lets you query a PostgreSQL database using plain English. It uses Claude to generate SQL from your question, validates it, runs it, and displays the results.
+An LLM wrapper for generating SQL queries from natural language.
 
 Built with Flask, PostgreSQL, SQLAlchemy, and the Anthropic API.
+
+## Features
+
+- Natural language to SQL via Claude
+- Auto-retry with error self-correction (up to 3 attempts)
+- CSV upload to query your own data
+- Auto-generated bar/line chart visualizations
+- Query history with re-run support
+- SQL validation (read-only, destructive keywords blocked)
 
 ## How it works
 
 1. User types a question in plain English
 2. The app reads the database schema using SQLAlchemy's `inspect()`
 3. The schema + question are sent to Claude, which generates a SQL query
-4. The SQL is validated (read-only, no destructive keywords)
-5. The query runs against PostgreSQL and results are returned
-6. If the query fails, the error is fed back to Claude for self-correction (up to 3 retries)
-
-## Database
-
-The sample database models a small e-commerce store with 6 tables:
-
-- `categories` - product categories
-- `customers` - customer profiles with location data
-- `products` - product catalog linked to categories
-- `orders` - order records with status tracking
-- `order_items` - line items within each order
-- `reviews` - customer product reviews (1-5 rating)
-
-See `schema.sql` for the full schema and seed data.
+4. The SQL is validated and executed against PostgreSQL
+5. If the query fails, the error is fed back to Claude for self-correction
 
 ## Setup
 
@@ -64,8 +59,6 @@ Create a `.env` file in the project root:
 ```
 ANTHROPIC_API_KEY=your-api-key-here
 DB_URL=postgresql://postgres:yourpassword@localhost:5433/textosql
-POSTGRES_PASSWORD=yourpassword
-DB_URL_DOCKER=postgresql://postgres:yourpassword@db:5432/textosql
 ```
 
 ### Run
@@ -76,23 +69,25 @@ python app.py
 
 Open `http://127.0.0.1:5000` in your browser.
 
+### Docker
+
+```bash
+docker compose up --build
+```
+
 ## Project structure
 
 ```
 text-to-sql/
-├── app.py              # Flask app, routes, LLM integration, SQL validation
+├── app.py              # Flask app, routes, LLM integration
 ├── templates/
 │   └── index.html      # Frontend UI
 ├── schema.sql          # Database schema and seed data
-├── requirements.txt    # Python dependencies
-├── .env                # API keys and DB credentials (not committed)
-└── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── .env                # API keys and DB credentials (not committed)
 ```
-
-## Security
-
-- Only SELECT/WITH queries are allowed. Destructive keywords (DROP, DELETE, ALTER, etc.) are blocked before execution.
-- API keys and DB credentials are stored in `.env` and excluded from version control.
 
 ## License
 
