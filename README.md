@@ -4,6 +4,8 @@ An LLM wrapper for generating SQL queries from natural language.
 
 Built with Flask, PostgreSQL, SQLAlchemy, and the Anthropic API.
 
+**Live demo:** https://text-to-sql-5d9f.onrender.com
+
 ## Features
 
 - Natural language to SQL via Claude
