@@ -63,7 +63,9 @@ Create a `.env` file in the project root:
 
 ```
 ANTHROPIC_API_KEY=your-api-key-here
-DB_URL=postgresql://postgres:yourpassword@localhost:5432/textosql
+DB_URL=postgresql://postgres:yourpassword@localhost:5433/textosql
+POSTGRES_PASSWORD=yourpassword
+DB_URL_DOCKER=postgresql://postgres:yourpassword@db:5432/textosql
 ```
 
 ### Run
@@ -91,14 +93,6 @@ text-to-sql/
 
 - Only SELECT/WITH queries are allowed. Destructive keywords (DROP, DELETE, ALTER, etc.) are blocked before execution.
 - API keys and DB credentials are stored in `.env` and excluded from version control.
-
-## Future improvements
-
-- Query history and caching
-- Chart visualization for numeric results
-- Docker Compose setup
-- Test suite for SQL validation and schema introspection
-- Rate limiting on the API endpoint
 
 ## License
 

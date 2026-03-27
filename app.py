@@ -21,16 +21,20 @@ client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 MAX_RETRIES = 3
 
-# Tables that are part of the app itself
+# Sample data tables
 PROTECTED_TABLES = {"categories", "customers", "products", "orders", "order_items", "reviews", "query_history"}
 
 
-def get_schema_description():
+def get_schema_description(selected_tables=None):
     inspector = inspect(engine)
     schema_parts = []
 
     for table_name in inspector.get_table_names():
         if table_name == "query_history":
+            continue
+
+        # If the user selected specific tables, only include those
+        if selected_tables and table_name not in selected_tables:
             continue
 
         columns = inspector.get_columns(table_name)
@@ -54,6 +58,7 @@ def get_schema_description():
 
     return "\n\n".join(schema_parts)
 
+
 def generate_sql(user_question, schema, failed_sql=None, error_message=None):
     system_prompt = (
         "You are a SQL expert. Given the following PostgreSQL database schema, "
@@ -63,6 +68,7 @@ def generate_sql(user_question, schema, failed_sql=None, error_message=None):
         "- Use only SELECT statements (never INSERT, UPDATE, DELETE, DROP, etc.)\n"
         "- Use proper JOIN syntax when combining tables\n"
         "- Always alias columns for readability\n"
+        "- ONLY use tables and columns that exist in the schema below\n"
         f"\nDATABASE SCHEMA:\n{schema}"
     )
 
@@ -148,18 +154,12 @@ def save_query(question, sql, success, attempts, error_message=None, row_count=N
 
 
 def sanitize_table_name(name):
-    # Remove file extension
     name = os.path.splitext(name)[0]
-    # Replace any non-alphanumeric character with underscore
     name = re.sub(r"[^a-zA-Z0-9]", "_", name)
-    # Remove leading/trailing underscores and collapse multiples
     name = re.sub(r"_+", "_", name).strip("_")
-    # Lowercase
     name = name.lower()
-    # Ensure it doesn't start with a number
     if name and name[0].isdigit():
         name = "t_" + name
-    # Truncate to 63 chars (PostgreSQL limit)
     name = name[:63]
     return name or "uploaded_data"
 
@@ -225,15 +225,12 @@ def upload_csv():
     if not file.filename.lower().endswith(".csv"):
         return jsonify({"error": "Only CSV files are supported."}), 400
 
-    # Generate a safe table name from the filename
     table_name = sanitize_table_name(file.filename)
 
-    # Check if it would conflict with a protected table
     if table_name in PROTECTED_TABLES:
         table_name = "uploaded_" + table_name
 
     try:
-        # Read the CSV into a pandas DataFrame
         df = pd.read_csv(file)
 
         if df.empty:
@@ -242,18 +239,15 @@ def upload_csv():
         if len(df.columns) < 1:
             return jsonify({"error": "The CSV file has no columns."}), 400
 
-        # Clean up column names for PostgreSQL
         df.columns = [
             re.sub(r"[^a-zA-Z0-9]", "_", col).strip("_").lower()
             for col in df.columns
         ]
 
-        # Drop the existing table if re-uploading the same file
         with engine.connect() as conn:
             conn.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
             conn.commit()
 
-        # Write the DataFrame to PostgreSQL
         df.to_sql(table_name, engine, index=False, if_exists="replace")
 
         return jsonify({
@@ -277,7 +271,6 @@ def delete_table(table_name):
         return jsonify({"error": "Cannot delete sample data tables."}), 403
 
     try:
-        # Verify the table actually exists
         inspector = inspect(engine)
         if table_name not in inspector.get_table_names():
             return jsonify({"error": f"Table '{table_name}' not found."}), 404
@@ -295,11 +288,15 @@ def delete_table(table_name):
 def handle_query():
     data = request.get_json(silent=True) or {}
     user_question = (data.get("question") or "").strip()
+    selected_tables = data.get("tables")  # None means "use all tables"
 
     if not user_question:
         return jsonify({"error": "Please enter a question."}), 400
 
-    schema = get_schema_description()
+    schema = get_schema_description(selected_tables)
+
+    if not schema.strip():
+        return jsonify({"error": "No tables selected. Please select at least one table."}), 400
 
     attempts = []
     last_sql = None

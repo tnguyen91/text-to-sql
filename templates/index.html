@@ -23,21 +23,10 @@
             gap: 24px;
         }
 
-        .main-content {
-            flex: 1;
-            min-width: 0;
-        }
+        .main-content { flex: 1; min-width: 0; }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 32px;
-        }
+        h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+        .subtitle { color: #666; margin-bottom: 32px; }
 
         .card {
             background: white;
@@ -57,16 +46,8 @@
             align-items: center;
         }
 
-        .input-area label {
-            font-weight: 500;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 12px;
-        }
+        .input-area label { font-weight: 500; display: block; margin-bottom: 8px; }
+        .input-row { display: flex; gap: 12px; }
 
         input[type="text"] {
             flex: 1;
@@ -112,6 +93,80 @@
 
         .example-btn:hover { background: #e0deff; }
 
+        /* Table selector */
+        .table-selector {
+            margin-bottom: 16px;
+        }
+
+        .table-selector-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-selector-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .table-selector-actions button {
+            padding: 2px 8px;
+            font-size: 11px;
+            background: none;
+            color: #4f46e5;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .table-selector-actions button:hover {
+            background: #f0efff;
+        }
+
+        .table-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .table-pill {
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1.5px solid transparent;
+            user-select: none;
+        }
+
+        .table-pill.selected {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .table-pill.unselected {
+            background: #f3f4f6;
+            color: #888;
+            border-color: #e5e7eb;
+        }
+
+        .table-pill.unselected:hover {
+            background: #e5e7eb;
+            color: #555;
+        }
+
+        .table-pill .pill-count {
+            font-weight: 400;
+            opacity: 0.7;
+            margin-left: 4px;
+        }
+
+        /* Upload area */
         .upload-zone {
             border: 2px dashed #ddd;
             border-radius: 8px;
@@ -131,11 +186,8 @@
         .upload-hint { font-size: 12px; color: #999; margin-top: 4px; }
 
         .upload-status {
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 12px;
-            display: none;
+            padding: 12px; border-radius: 8px; font-size: 13px;
+            margin-bottom: 12px; display: none;
         }
 
         .upload-status.success { display: block; background: #f0fdf4; color: #166534; }
@@ -144,24 +196,16 @@
         .table-list { display: flex; flex-direction: column; gap: 8px; }
 
         .table-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            background: #f9fafb;
-            border-radius: 8px;
-            font-size: 13px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; background: #f9fafb; border-radius: 8px; font-size: 13px;
         }
 
         .table-info { display: flex; align-items: center; gap: 8px; min-width: 0; }
         .table-name { font-weight: 600; color: #333; }
 
         .table-badge {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            flex-shrink: 0;
+            padding: 2px 6px; border-radius: 4px; font-size: 11px;
+            font-weight: 500; flex-shrink: 0;
         }
 
         .table-badge.sample { background: #e0e7ff; color: #3730a3; }
@@ -169,134 +213,73 @@
         .table-meta { color: #999; font-size: 12px; flex-shrink: 0; }
 
         .delete-btn {
-            padding: 4px 8px;
-            font-size: 11px;
-            background: #fee2e2;
-            color: #dc2626;
-            border-radius: 4px;
-            flex-shrink: 0;
+            padding: 4px 8px; font-size: 11px; background: #fee2e2;
+            color: #dc2626; border-radius: 4px; flex-shrink: 0;
         }
 
         .delete-btn:hover { background: #fecaca; }
 
         .table-columns {
-            font-size: 11px;
-            color: #888;
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 400px;
+            font-size: 11px; color: #888; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px;
         }
 
+        /* Results */
         .results {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: none;
+            background: white; border-radius: 12px; padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: none;
         }
 
         .results.visible { display: block; }
 
         .sql-display {
-            background: #1e1e2e;
-            color: #cdd6f4;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: "Cascadia Code", "Fira Code", monospace;
-            font-size: 14px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px;
+            font-family: "Cascadia Code", "Fira Code", monospace; font-size: 14px;
+            white-space: pre-wrap; word-break: break-word; margin-bottom: 20px; line-height: 1.6;
         }
 
         .sql-label {
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #666;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 500; margin-bottom: 8px; color: #666; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
 
         .table-wrapper { overflow-x: auto; margin-top: 16px; }
-
         table { width: 100%; border-collapse: collapse; }
 
         th {
-            background: #f8f8f8;
-            text-align: left;
-            padding: 10px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-            border-bottom: 2px solid #eee;
+            background: #f8f8f8; text-align: left; padding: 10px 14px;
+            font-size: 13px; font-weight: 600; color: #555; border-bottom: 2px solid #eee;
         }
 
         td { padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 14px; }
         tr:hover td { background: #fafafa; }
         .row-count { color: #666; font-size: 13px; margin-top: 12px; }
 
-        .error {
-            background: #fef2f2;
-            color: #dc2626;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
+        .error { background: #fef2f2; color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
         .loading { text-align: center; padding: 40px; color: #666; }
 
         .retry-badge {
-            display: inline-block;
-            background: #fef3c7;
-            color: #92400e;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 16px;
+            display: inline-block; background: #fef3c7; color: #92400e;
+            padding: 4px 10px; border-radius: 6px; font-size: 12px;
+            font-weight: 500; margin-bottom: 16px;
         }
 
         .retry-history { margin-bottom: 20px; border-left: 3px solid #e5e7eb; padding-left: 16px; }
         .retry-history summary { cursor: pointer; font-size: 13px; color: #666; margin-bottom: 8px; }
-
         .retry-attempt { margin-bottom: 12px; padding: 12px; background: #fafafa; border-radius: 6px; }
         .retry-attempt .attempt-label { font-size: 12px; font-weight: 600; color: #dc2626; margin-bottom: 4px; }
         .retry-attempt .attempt-error { font-size: 13px; color: #666; margin-bottom: 6px; }
 
         .retry-attempt .attempt-sql {
             font-family: "Cascadia Code", "Fira Code", monospace;
-            font-size: 12px;
-            color: #888;
-            white-space: pre-wrap;
-            word-break: break-word;
+            font-size: 12px; color: #888; white-space: pre-wrap; word-break: break-word;
         }
 
-        /* Chart */
-        .chart-container {
-            margin: 20px 0;
-            padding: 16px;
-            background: #fafafa;
-            border-radius: 8px;
-            position: relative;
-            height: 300px;
-        }
-
-        .chart-toggle {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
+        .chart-container { margin: 20px 0; padding: 16px; background: #fafafa; border-radius: 8px; position: relative; height: 300px; }
+        .chart-toggle { display: flex; gap: 4px; margin-bottom: 12px; }
 
         .chart-toggle button {
-            padding: 6px 14px;
-            font-size: 12px;
-            background: #f3f4f6;
-            color: #555;
-            border-radius: 6px;
+            padding: 6px 14px; font-size: 12px; background: #f3f4f6; color: #555; border-radius: 6px;
         }
 
         .chart-toggle button:hover { background: #e5e7eb; }
@@ -306,64 +289,45 @@
         .sidebar { width: 280px; flex-shrink: 0; }
 
         .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
-            position: sticky;
-            top: 20px;
+            background: white; border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;
+            position: sticky; top: 20px;
         }
 
         .sidebar-header {
-            padding: 16px;
-            font-weight: 600;
-            font-size: 14px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px; font-weight: 600; font-size: 14px;
+            border-bottom: 1px solid #eee; display: flex;
+            justify-content: space-between; align-items: center;
         }
 
         .sidebar-header .refresh-btn {
-            padding: 4px 10px;
-            font-size: 12px;
-            background: #f3f4f6;
-            color: #555;
-            border-radius: 6px;
+            padding: 4px 10px; font-size: 12px; background: #f3f4f6;
+            color: #555; border-radius: 6px;
         }
 
         .sidebar-header .refresh-btn:hover { background: #e5e7eb; }
         .history-list { max-height: 70vh; overflow-y: auto; }
 
         .history-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-            cursor: pointer;
-            transition: background 0.15s;
+            padding: 12px 16px; border-bottom: 1px solid #f3f4f6;
+            cursor: pointer; transition: background 0.15s;
         }
 
         .history-item:hover { background: #f9fafb; }
         .history-item:last-child { border-bottom: none; }
 
         .history-question {
-            font-size: 13px;
-            color: #333;
-            margin-bottom: 6px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
+            font-size: 13px; color: #333; margin-bottom: 6px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
             line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
         .history-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; color: #999; }
 
         .history-status {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            flex-shrink: 0;
+            display: inline-block; width: 7px; height: 7px;
+            border-radius: 50%; flex-shrink: 0;
         }
 
         .history-status.success { background: #22c55e; }
@@ -384,6 +348,7 @@
             <h1>Text to SQL Explorer</h1>
             <p class="subtitle">Ask questions about any database in plain English</p>
 
+            <!-- Data Management -->
             <div class="card">
                 <div class="card-title">
                     <span>Your data</span>
@@ -401,8 +366,24 @@
                 </div>
             </div>
 
+            <!-- Query input -->
             <div class="card input-area">
                 <label for="question">Your question:</label>
+
+                <!-- Table selector -->
+                <div class="table-selector">
+                    <div class="table-selector-label">
+                        <span>Query these tables:</span>
+                        <div class="table-selector-actions">
+                            <button onclick="selectAllTables()">All</button>
+                            <button onclick="selectNoTables()">None</button>
+                        </div>
+                    </div>
+                    <div class="table-pills" id="table-pills">
+                        <span style="color:#999;font-size:12px;">Loading...</span>
+                    </div>
+                </div>
+
                 <div class="input-row">
                     <input type="text" id="question" placeholder="e.g. What are the top 5 best-selling products?">
                     <button id="submit-btn" onclick="submitQuestion()">Ask</button>
@@ -434,6 +415,55 @@
 
     <script>
         let currentChart = null;
+        let selectedTables = new Set();  // Track which tables are selected
+        let allTableData = [];           // Store table data for pills
+
+        // ---- Table selector ----
+
+        function renderTablePills() {
+            const container = document.getElementById("table-pills");
+
+            if (allTableData.length === 0) {
+                container.innerHTML = '<span style="color:#999;font-size:12px;">No tables available</span>';
+                return;
+            }
+
+            let html = "";
+            for (const t of allTableData) {
+                const isSelected = selectedTables.has(t.name);
+                const cls = isSelected ? "selected" : "unselected";
+                html += `<span class="table-pill ${cls}" onclick="toggleTable('${t.name}')">${t.name}<span class="pill-count">(${t.row_count})</span></span>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function toggleTable(name) {
+            if (selectedTables.has(name)) {
+                selectedTables.delete(name);
+            } else {
+                selectedTables.add(name);
+            }
+            renderTablePills();
+        }
+
+        function selectAllTables() {
+            for (const t of allTableData) {
+                selectedTables.add(t.name);
+            }
+            renderTablePills();
+        }
+
+        function selectNoTables() {
+            selectedTables.clear();
+            renderTablePills();
+        }
+
+        function getSelectedTableList() {
+            // If all tables are selected, send null (meaning "use all" — same as before)
+            if (selectedTables.size === allTableData.length) return null;
+            // If none selected, return empty array (backend will return an error)
+            return Array.from(selectedTables);
+        }
 
         // ---- Chart logic ----
 
@@ -455,26 +485,18 @@
             }
 
             if (labelCol === -1 || numericCols.length === 0) return null;
-
             return { labelCol, numericCols };
         }
 
         function renderChart(columns, rows, analysis, type) {
-            if (currentChart) {
-                currentChart.destroy();
-                currentChart = null;
-            }
-
+            if (currentChart) { currentChart.destroy(); currentChart = null; }
             const canvas = document.getElementById("result-chart");
             if (!canvas) return;
 
             const labels = rows.map(r => String(r[analysis.labelCol]));
-
             const palette = [
-                "rgba(79, 70, 229, 0.7)",
-                "rgba(16, 185, 129, 0.7)",
-                "rgba(245, 158, 11, 0.7)",
-                "rgba(239, 68, 68, 0.7)",
+                "rgba(79, 70, 229, 0.7)", "rgba(16, 185, 129, 0.7)",
+                "rgba(245, 158, 11, 0.7)", "rgba(239, 68, 68, 0.7)",
                 "rgba(139, 92, 246, 0.7)",
             ];
 
@@ -495,27 +517,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: datasets.length > 1,
-                            position: "top",
-                            labels: { font: { size: 12 } },
-                        },
+                        legend: { display: datasets.length > 1, position: "top", labels: { font: { size: 12 } } },
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: "rgba(0,0,0,0.05)" },
-                            ticks: { font: { size: 11 } },
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 11 },
-                                maxRotation: 45,
-                                autoSkip: true,
-                                maxTicksLimit: 20,
-                            },
-                        },
+                        y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.05)" }, ticks: { font: { size: 11 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 20 } },
                     },
                 },
             });
@@ -525,7 +531,6 @@
             const analysis = analyzeChartability(columns, rows);
             if (!analysis) return "";
 
-            // Store analysis on window so toggle buttons can access it
             window._chartAnalysis = analysis;
             window._chartColumns = columns;
             window._chartRows = rows;
@@ -536,9 +541,7 @@
                     <button class="active" onclick="switchChart('bar', this)">Bar</button>
                     <button onclick="switchChart('line', this)">Line</button>
                 </div>
-                <div class="chart-container">
-                    <canvas id="result-chart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="result-chart"></canvas></div>
             `;
         }
 
@@ -573,10 +576,16 @@
             submitBtn.disabled = true;
 
             try {
+                const body = { question: question };
+                const tableList = getSelectedTableList();
+                if (tableList !== null) {
+                    body.tables = tableList;
+                }
+
                 const response = await fetch("/query", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ question: question })
+                    body: JSON.stringify(body)
                 });
 
                 const data = await response.json();
@@ -585,10 +594,7 @@
                     let html = `<div class="error">${data.error}</div>`;
                     if (data.retry_history) html += buildRetryHistory(data.retry_history);
                     if (data.sql) {
-                        html += `
-                            <div class="sql-label">Last generated SQL</div>
-                            <div class="sql-display">${data.sql}</div>
-                        `;
+                        html += `<div class="sql-label">Last generated SQL</div><div class="sql-display">${data.sql}</div>`;
                     }
                     resultsDiv.innerHTML = html;
                 } else {
@@ -603,10 +609,8 @@
                         <div class="sql-display">${data.sql}</div>
                     `;
 
-                    // Add chart (before the table)
                     html += buildChartHTML(data.columns, data.rows);
 
-                    // Build results table
                     let tableHTML = "<table><thead><tr>";
                     for (const col of data.columns) tableHTML += `<th>${col}</th>`;
                     tableHTML += "</tr></thead><tbody>";
@@ -622,14 +626,10 @@
                         <div class="table-wrapper">${tableHTML}</div>
                         <div class="row-count">${data.row_count} row${data.row_count !== 1 ? "s" : ""} returned</div>
                     `;
-
                     resultsDiv.innerHTML = html;
 
-                    // Render the chart now that canvas is in the DOM
                     const analysis = analyzeChartability(data.columns, data.rows);
-                    if (analysis) {
-                        renderChart(data.columns, data.rows, analysis, "bar");
-                    }
+                    if (analysis) renderChart(data.columns, data.rows, analysis, "bar");
                 }
             } catch (err) {
                 resultsDiv.innerHTML = `<div class="error">Connection error: ${err.message}</div>`;
@@ -771,6 +771,29 @@
                 const tables = await response.json();
                 const listDiv = document.getElementById("table-list");
 
+                // Update the table pills
+                allTableData = tables;
+
+                // If this is the first load, select all tables
+                if (selectedTables.size === 0) {
+                    for (const t of tables) selectedTables.add(t.name);
+                } else {
+                    // Add any newly uploaded tables to selection
+                    for (const t of tables) {
+                        if (!allTableData.some(old => old.name === t.name && old !== t)) {
+                            // Keep existing selections, auto-select new uploads
+                        }
+                    }
+                    // Also add any new table that wasn't in the old set
+                    const currentNames = new Set(tables.map(t => t.name));
+                    // Remove any selected tables that no longer exist
+                    for (const name of selectedTables) {
+                        if (!currentNames.has(name)) selectedTables.delete(name);
+                    }
+                }
+
+                renderTablePills();
+
                 if (tables.length === 0) {
                     listDiv.innerHTML = '<div style="color:#999;font-size:13px;text-align:center;padding:12px;">No tables yet.</div>';
                     return;
@@ -811,7 +834,10 @@
                 const response = await fetch(`/tables/${name}`, { method: "DELETE" });
                 const data = await response.json();
                 if (data.error) alert(data.error);
-                else loadTables();
+                else {
+                    selectedTables.delete(name);
+                    loadTables();
+                }
             } catch (err) {
                 alert(`Delete failed: ${err.message}`);
             }
